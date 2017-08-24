@@ -53,7 +53,7 @@ class RecipeController extends Controller
             $ingredients[] = new RecipeIngredient($ingredient);
         }
       $categories = [];
-        foreach($request->cateogries as $category) {
+        foreach($request->categories as $category) {
             $categories[] = new Category($category);
         }
       $tags = [];
