@@ -18,6 +18,14 @@ class Recipe extends Model
     {
     	return $this->hasMany(RecipeDirection::class);
     }
+    public function categories()
+    {
+    	return $this->hasMany(Category::class);
+    }
+    public function tags()
+    {
+    	return $this->hasMany(Tag::class);
+    }
     public static function form()
     {
         return [
@@ -30,6 +38,14 @@ class Recipe extends Model
             'directions' => [
                 RecipeDirection::form(),
                 RecipeDirection::form()
+            ],
+            'categories' => [
+                Category::form(),
+                Category::form()
+            ],
+            'tags' => [
+                Tag::form(),
+                Tag::form()
             ]
         ];
     }

@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\RecipeIngredient;
 use App\RecipeDirection;
+use App\Category;
+use App\Tag;
 use App\Recipe;
 use App\User;
 use File;
@@ -40,11 +42,23 @@ class RecipeController extends Controller
     		'ingredients.*.name' => 'required|max:255',
     		'ingredients.*.qty' => 'required|max:255',
     		'directions' => 'required|array|min:1',
-    		'directions.*.description' => 'required|max:3000'
+    		'directions.*.description' => 'required|max:3000',
+        'categories' => 'required|array|min:1',
+    		'categories.*.name' => 'required|max:255',
+        'tags' => 'required|array|min:1',
+    		'tags.*.name' => 'required|max:255'
     	]);
     	$ingredients = [];
         foreach($request->ingredients as $ingredient) {
             $ingredients[] = new RecipeIngredient($ingredient);
+        }
+      $categories = [];
+        foreach($request->cateogries as $category) {
+            $categories[] = new Category($category);
+        }
+      $tags = [];
+        foreach($request->tags as $tag) {
+            $tags[] = new Tag($tag);
         }
 	   $directions = [];
         foreach($request->directions as $direction) {
@@ -61,6 +75,10 @@ class RecipeController extends Controller
     		->save($recipe);
     	$recipe->ingredients()
     		->saveMany($ingredients);
+      $recipe->categories()
+      	->saveMany($categories);
+      $recipe->tags()
+        ->saveMany($tags);
     	$recipe->directions()
     		->saveMany($directions);
     	return response()
@@ -76,7 +94,7 @@ class RecipeController extends Controller
     }
     public function show($id)
     {
-        $recipe = Recipe::with(['user', 'ingredients', 'directions'])
+        $recipe = Recipe::with(['user', 'ingredients', 'directions', 'categories', 'tags'])
             ->findOrFail($id);
         return response()
             ->json([
@@ -90,6 +108,10 @@ class RecipeController extends Controller
                 $query->get(['id', 'name', 'qty']);
             }, 'directions' => function($query) {
                 $query->get(['id', 'description']);
+            },  'categories' => function($query) {
+                $query->get(['id', 'name']);
+            },  'tags' => function($query) {
+                $query->get(['id', 'name']);
             }])
             ->findOrFail($id, [
                 'id', 'name', 'description', 'image'
@@ -112,7 +134,13 @@ class RecipeController extends Controller
             'ingredients.*.qty' => 'required|max:255',
             'directions' => 'required|array|min:1',
             'directions.*.id' => 'integer|exists:recipe_directions',
-            'directions.*.description' => 'required|max:3000'
+            'directions.*.description' => 'required|max:3000',
+            'categories' => 'required|array|min:1',
+            'categories.*.id' => 'integer|exists:categories',
+            'categories.*.name' => 'required|max:3000',
+            'tags' => 'required|array|min:1',
+            'tags.*.id' => 'integer|exists:tags',
+            'tags.*.name' => 'required|max:3000'
         ]);
         $recipe = $request->user()->recipes()
             ->findOrFail($id);
@@ -126,6 +154,30 @@ class RecipeController extends Controller
                 $ingredientsUpdated[] = $ingredient['id'];
             } else {
                 $ingredients[] = new RecipeIngredient($ingredient);
+            }
+        }
+        $categories = [];
+        $categoriesUpdated = [];
+        foreach($request->categories as $category) {
+            if(isset($category['id'])) {
+                Category::where('recipe_id', $recipe->id)
+                    ->where('id', $category['id'])
+                    ->update($category);
+                $categoriesUpdated[] = $category['id'];
+            } else {
+                $categories[] = new Category($category);
+            }
+        }
+        $tags = [];
+        $tagsUpdated = [];
+        foreach($request->tags as $tag) {
+            if(isset($tag['id'])) {
+                Tag::where('recipe_id', $recipe->id)
+                    ->where('id', $tag['id'])
+                    ->update($tag);
+                $tagsUpdated[] = $tag['id'];
+            } else {
+                $tags[] = new Tag($tag);
             }
         }
         $directions = [];
@@ -154,11 +206,23 @@ class RecipeController extends Controller
         RecipeIngredient::whereNotIn('id', $ingredientsUpdated)
             ->where('recipe_id', $recipe->id)
             ->delete();
+        Category::whereNotIn('id', $categoriesUpdated)
+            ->where('recipe_id', $recipe->id)
+            ->delete();
+        Tag::whereNotIn('id', $tagsUpdated)
+            ->where('recipe_id', $recipe->id)
+            ->delete();
         RecipeDirection::whereNotIn('id', $directionsUpdated)
             ->where('recipe_id', $recipe->id)
             ->delete();
         if(count($ingredients)) {
             $recipe->ingredients()->saveMany($ingredients);
+        }
+        if(count($categories)) {
+            $recipe->categories()->saveMany($categories);
+        }
+        if(count($tags)) {
+            $recipe->tags()->saveMany($tags);
         }
         if(count($directions)) {
             $recipe->directions()->saveMany($directions);
@@ -175,6 +239,10 @@ class RecipeController extends Controller
         $recipe = $request->user()->recipes()
             ->findOrFail($id);
         RecipeIngredient::where('recipe_id', $recipe->id)
+            ->delete();
+        Category::where('recipe_id', $recipe->id)
+            ->delete();
+        Tag::where('recipe_id', $recipe->id)
             ->delete();
         RecipeDirection::where('recipe_id', $recipe->id)
             ->delete();

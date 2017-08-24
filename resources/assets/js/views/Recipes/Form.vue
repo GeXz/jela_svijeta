@@ -10,6 +10,7 @@
 		<div class="recipe__row">
 			<div class="recipe__image">
 				<div class="recipe__box">
+					<image-upload v-model="form.image"></image-upload>
 					<small class="error__control" v-if="error.image">{{error.image[0]}}</small>
 				</div>
 			</div>
@@ -25,6 +26,30 @@
 					    <textarea class="form__control form__description" v-model="form.description"></textarea>
 					    <small class="error__control" v-if="error.description">{{error.description[0]}}</small>
 					</div>
+				</div>
+			</div>
+		</div>
+		<div class="recipe__row1">
+			<div class="recipe__tags">
+				<div class="recipe__box">
+					<h3 class="recipe__sub_title">Tags</h3>
+					<div v-for="(tag, index) in form.tags" class="recipe__form">
+						<input type="text" class="form__control" v-model="tag.name"
+							:class="[error[`tags.${index}.name`] ? 'error__bg' : '']">
+							<button @click="remove('tags', index)" class="btn btn__danger">&times;</button>
+							</div>
+							<button @click="addTag" class="btn">Add Tag</button>
+					</div>
+				</div>
+			<div class="recipe__categories">
+				<div class="recipe__directions_inner">
+					<h3 class="recipe__sub_title">Categories</h3>
+					<div v-for="(category, index) in form.categories" class="recipe__form">
+						<input type="text" class="form__control" v-model="category.name"
+							:class="[error[`categories.${index}.name`] ? 'error__bg' : '']">
+						<button @click="remove('categories', index)" class="btn btn__danger">&times;</button>
+					</div>
+					<button @click="addCategory" class="btn">Add Category</button>
 				</div>
 			</div>
 		</div>
@@ -61,15 +86,22 @@
 	import Vue from 'vue'
 	import Flash from '../../helpers/flash'
 	import { get, post } from '../../helpers/api'
+	import { toMulipartedForm } from '../../helpers/form'
+	import ImageUpload from '../../components/ImageUpload.vue'
 
 
 	export default {
+		components: {
+				ImageUpload
+		},
 
 		data() {
 			return {
 				form: {
 					ingredients: [],
-					directions: []
+					directions: [],
+					categories: [],
+					tags: []
 				},
 				error: {},
 				isProcessing: false,
@@ -96,7 +128,7 @@
 				    .then((res) => {
 				        if(res.data.saved) {
 				            Flash.setSuccess(res.data.message)
-				            this.$router.push(`recipes/${res.data.id}`)
+				            this.$router.push(`/recipes/${res.data.id}`)
 				        }
 				        this.isProcessing = false
 				    })
@@ -116,6 +148,16 @@
 				this.form.ingredients.push({
 					name: '',
 					qty: ''
+				})
+			},
+			addCategory() {
+				this.form.categories.push({
+					name: ''
+				})
+			},
+			addTag() {
+				this.form.tags.push({
+					name: ''
 				})
 			},
 			remove(type, index) {

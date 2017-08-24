@@ -20,6 +20,28 @@
 				</div>
 			</div>
 		</div>
+	<div class="recipe__row1">
+		<div class="recipe__tags">
+			<div class="recipe__box">
+				<h3 class="recipe__sub_title">Tags</h3>
+				<ul>
+					<li v-for="tag in recipe.tags">
+						<span>{{tag.name}}</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div class="recipe__categories">
+			<div class="recipe__directions_inner">
+				<h3 class="recipe__sub_title">Categories</h3>
+				<ul>
+					<li v-for="category in recipe.categories">
+						<span>{{category.name}}</span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 		<div class="recipe__row">
 			<div class="recipe__ingredients">
 				<div class="recipe__box">
@@ -45,7 +67,6 @@
 					</ul>
 				</div>
 			</div>
-
 		</div>
 	</div>
 </template>
@@ -61,7 +82,9 @@
 				recipe: {
 					user: {},
 					ingredients: [],
-					directions: []
+					directions: [],
+					categories: [],
+					tags: []
 				}
 			}
 		},

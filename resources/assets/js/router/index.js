@@ -15,6 +15,7 @@ const router = new VueRouter({
 
 	routes: [
 		{ path: '/', component: RecipeIndex },
+		{ path: '/recipes/create', component: RecipeForm, meta: { mode: 'create' }},
 		{ path: '/recipes/:id/edit', component: RecipeForm, meta: { mode: 'edit' }},
 		{ path: '/recipes/:id', component: RecipeShow },
     	{ path: '/register', component: Register },

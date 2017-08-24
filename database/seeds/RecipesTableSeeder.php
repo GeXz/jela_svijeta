@@ -4,6 +4,8 @@ use Faker\Factory;
 use App\Recipe;
 use App\RecipeDirection;
 use App\RecipeIngredient;
+use App\Tag;
+use App\Category;
 class RecipesTableSeeder extends Seeder
 {
     /**
@@ -17,6 +19,8 @@ class RecipesTableSeeder extends Seeder
         Recipe::truncate();
         RecipeIngredient::truncate();
         RecipeDirection::truncate();
+        Category::truncate();
+        Tag::truncate();
         foreach(range(1, 10) as $i) {
         	$recipe = Recipe::create([
         		'user_id' => $i,
@@ -35,6 +39,18 @@ class RecipesTableSeeder extends Seeder
         		RecipeDirection::create([
         			'recipe_id' => $recipe->id,
         			'description' => $faker->sentence,
+        		]);
+        	}
+          foreach(range(1, mt_rand(3, 12)) as $l) {
+        		Category::create([
+        			'recipe_id' => $recipe->id,
+        			'name' => $faker->word,
+        		]);
+        	}
+          foreach(range(1, mt_rand(3, 12)) as $h) {
+        		Tag::create([
+        			'recipe_id' => $recipe->id,
+        			'name' => $faker->word,
         		]);
         	}
         }
